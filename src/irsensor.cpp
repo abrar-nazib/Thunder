@@ -16,7 +16,7 @@ static int sensorLowestReadings[numOfSensors];
 byte numOfHighReadings;
 //---------------------- Connection Related---------------------------------------
 #define IR_LED 31
-static byte sensorPin[numOfSensors] = {7, 6, 5, 4, 3, 2, 1, 0}; // arduino analog pins
+static byte sensorPin[numOfSensors] = {0, 1, 2, 3, 4, 5, 6, 7}; // arduino analog pins
 //------------------------- Invert Related Variable--------------------------------------------------
 bool isInvert = 0;
 // ------------------------------External Global Variables----------------------------
@@ -167,7 +167,7 @@ void generateThreshold()
     }
     for (int thr = 0; thr < numOfSensors; thr++)
     {
-        sensorThreshold[thr] = (sensorHighestReadings[thr] + sensorLowestReadings[thr]) / 2;
+        sensorThreshold[thr] = ((sensorHighestReadings[thr] + sensorLowestReadings[thr]) / 2) - 100;
     }
     Stop(10);
     memorySaveSensorVariables();
@@ -194,6 +194,11 @@ bool portRead(char port_type, byte pin_number)
     else if (port_type == 'G')
     {
         reading = (PING >> pin_number) & 1;
+        return reading;
+    }
+    else if (port_type == 'A')
+    {
+        reading = (PINA >> pin_number) & 1;
         return reading;
     }
     return 0;

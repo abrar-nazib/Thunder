@@ -2,13 +2,13 @@
 #include "motor.h"
 
 //-------------- Connection related---------------------------------------
-#define R_MTR_PWM 7
-#define R_MTR_IN_1 5
-#define R_MTR_IN_2 6
+#define R_MTR_PWM 4
+#define R_MTR_IN_1 3
+#define R_MTR_IN_2 2
 
-#define L_MTR_PWM 2
-#define L_MTR_IN_1 4
-#define L_MTR_IN_2 3
+#define L_MTR_PWM 13
+#define L_MTR_IN_1 6
+#define L_MTR_IN_2 7
 
 #define MTR_STBY 5
 
@@ -38,6 +38,7 @@ extern void accessMemoryArray(struct Memory *m, uint8_t *accessArray);
 extern double PIDvalue;
 extern double Vul;
 extern byte numOfHighReadings;
+extern byte sensorBinaryData;
 extern struct Memory sensorMemory;
 //-------------------------------------------------------------------
 
@@ -57,10 +58,10 @@ void motorSetup()
 void motorTestAuto()
 {
     // Motor Forward Test
-    analogWrite(R_MTR_PWM, 100);
-    digitalWrite(R_MTR_IN_1, HIGH);
-    digitalWrite(R_MTR_IN_2, LOW);
-    delay(1000);
+    // analogWrite(R_MTR_PWM, 100);
+    // digitalWrite(R_MTR_IN_1, HIGH);
+    // digitalWrite(R_MTR_IN_2, LOW);
+    // delay(1000);
 
     // digitalWrite(R_MTR_IN_1, LOW);
     // digitalWrite(R_MTR_IN_2, LOW);
@@ -166,42 +167,44 @@ void Stop(double del)
 void BreakF()
 {
     Stop(10);
-    Backward(50, 200);
-    Stop(20);
+    Backward(50, 100);
+    Stop(10);
 }
 // //-----------------------------------------------------------------------------------------
 void BreakL()
 {
     Stop(10);
-    Right(50, 200);
+    Right(50, 100);
     Stop(20);
 }
 // //-----------------------------------------------------------------------------------------
 void BreakR()
 {
     Stop(10);
-    Left(50, 200);
+    Left(50, 100);
     Stop(20);
 }
 //------------------------------Sharp Turn Functions------------------------------------------
 void Tleft()
 {
     BreakF();
+    Stop(50);
     while (1)
     {
-        Left(10, 100);
+        Left(10, 150);
         readSensors();
         generateBinary();
         if (sensorBinaryReading[0] == 1 || sensorBinaryReading[1] == 1)
         {
             while (true)
             {
-                Left(10, 50);
+                Left(10, 100);
                 readSensors();
                 generateBinary();
                 if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
                 {
                     BreakL();
+                    Stop(50);
                     break;
                 }
             }
@@ -213,21 +216,23 @@ void Tleft()
 void Tright()
 {
     BreakF();
+    Stop(50);
     while (1)
     {
-        Right(10, 100);
+        Right(10, 150);
         readSensors();
         generateBinary();
         if (sensorBinaryReading[6] == 1 || sensorBinaryReading[7] == 1)
         {
             while (true)
             {
-                Right(10, 50);
+                Right(10, 100);
                 readSensors();
                 generateBinary();
                 if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
                 {
                     BreakR();
+                    Stop(50);
                     break;
                 }
             }
@@ -241,12 +246,12 @@ void doura()
     if (Vul > 0)
     {
         R_motorSpeed = motorSpeed - PIDvalue;
-        L_motorSpeed = motorSpeed;
+        L_motorSpeed = (motorSpeed)*0.85;
     }
     else if (Vul < 0)
     {
-        L_motorSpeed = motorSpeed + PIDvalue;
         R_motorSpeed = motorSpeed;
+        L_motorSpeed = (motorSpeed + PIDvalue) * 0.85;
     }
     else
     {
@@ -258,13 +263,25 @@ void doura()
         R_motorSpeed = 5;
     if (L_motorSpeed < 5)
         L_motorSpeed = 5;
+    if (R_motorSpeed > 250)
+        R_motorSpeed = 250;
+    if (L_motorSpeed > 250)
+        L_motorSpeed = 250;
 
     analogWrite(R_MTR_PWM, R_motorSpeed);
     analogWrite(L_MTR_PWM, L_motorSpeed);
-    digitalWrite(R_MTR_IN_1, HIGH);
-    digitalWrite(L_MTR_IN_1, HIGH);
-    digitalWrite(R_MTR_IN_2, LOW);
-    digitalWrite(L_MTR_IN_2, LOW);
+
+    // digitalWrite(R_MTR_IN_1, HIGH); // 4
+    PORTG = PORTG | (1 << 5);
+
+    // digitalWrite(L_MTR_IN_1, HIGH);  // 6
+    PORTH = PORTH | (1 << 3);
+
+    // digitalWrite(R_MTR_IN_2, LOW); // 2->PORTE-4
+    PORTE = PORTE & ~(1 << 4);
+
+    // digitalWrite(L_MTR_IN_2, LOW); // 7->PORTH-4
+    PORTH = PORTH & ~(1 << 4);
 }
 
 void Run()
@@ -274,7 +291,7 @@ void Run()
     deviation();
     PIDval();
     doura();
-    if (numOfHighReadings == 0 || numOfHighReadings > 6)
+    if (numOfHighReadings >= 4)
     {
         detection();
     }
@@ -282,38 +299,52 @@ void Run()
 
 void detection()
 {
-    const int memoryLength = 200;
-    digitalWrite(LED_1, HIGH);
-    digitalWrite(LED_2, HIGH);
+    while (true)
+    {
+        readSensors();
+        generateBinary();
+        if (numOfHighReadings < 4)
+        {
+            break;
+        }
+    }
+
+    const int memoryLength = 300;
+    // digitalWrite(LED_1, HIGH);
+    // digitalWrite(LED_2, HIGH);
     int l = 0;
     int r = 0;
     uint8_t lReference = 0b10000000;
     uint8_t rReference = 0b00000001;
     uint8_t accessArray[memoryLength];
+
     accessMemoryArray(&sensorMemory, accessArray);
+
     for (int i = 0; i < memoryLength; i++)
     {
         l += (accessArray[i] & lReference) >> 7;
         r += (accessArray[i] & rReference);
     }
-    // memoryShowData(&sensorMemory);
-    digitalWrite(LED_1, LOW);
-    digitalWrite(LED_2, LOW);
+    // // memoryShowData(&sensorMemory);
+    // digitalWrite(LED_1, LOW);
+    // digitalWrite(LED_2, LOW);
 
+    readSensors();
+    generateBinary();
+    if (sensorBinaryData == B11111111)
+    {
+        Stop(10000);
+    }
     if (r > l)
     {
-        digitalWrite(LED_1, HIGH);
+        // digitalWrite(LED_1, HIGH);
         Tright();
-        digitalWrite(LED_1, LOW);
+        // digitalWrite(LED_1, LOW);
     }
     if (l > r)
     {
-        digitalWrite(LED_2, HIGH);
+        // digitalWrite(LED_2, HIGH);
         Tleft();
-        digitalWrite(LED_2, LOW);
-    }
-    if (l == r)
-    {
-        Stop(2000);
+        // digitalWrite(LED_2, LOW);
     }
 }

@@ -26,12 +26,15 @@ EEPROM memory diagram:
 
 ## Mega Pin Mapping
 
-- 32 Down_btn PINC5
-- 34 right_btn PINC3
-- 36 select_btn PINC1
+- 22 Down_btn
+- 24 right_btn PINC3
+- 28 select_btn PINC1
 - 38 left_btn PIND7
-- 40 up_btn PING1
-- 4 MotorLPin1
-- 3 MotorLPin2
-- 5 MotorRpin1
-- 6 MorotRpin2
+- 30 up_btn
+- 5 STBY
+- 3 PWMA
+- 2 AIN1
+- 4 AIN2
+- 13 PWMB
+- 6 BIN1
+- 7 BIN2

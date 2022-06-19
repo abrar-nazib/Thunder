@@ -13,7 +13,7 @@ const int numOfSensors = 8;
 extern unsigned int sensorThreshold[numOfSensors];
 extern void setup()
 {
-  Serial.begin(9600);
+  // Serial.begin(9600);
   displaySetup();
   buttonSetup();
   memorySetup(&sensorMemory);

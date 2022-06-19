@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#define trigPin 33
-#define echoPin 35
+#define trigPin 50
+#define echoPin 51
 
 long duration;
 int distance;
@@ -25,6 +25,14 @@ int sonarSearch()
     // Calculating the distance
     distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
     // Displays the distance on the Serial Monitor
-    Serial.print(distance);
+    // Serial.print(distance);
     return distance;
+}
+
+void sonarTest(bool newline)
+{
+    if (newline)
+        Serial.println(sonarSearch());
+    else
+        Serial.print(sonarSearch());
 }

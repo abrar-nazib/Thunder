@@ -22,6 +22,7 @@ extern void generateBinary();
 extern void Run();
 extern void Stop(double del);
 extern int sonarSearch();
+extern void Forward(double del, int vel);
 //--------- External important variables----------------------------------------------------------
 extern float motorVariables[4];
 
@@ -170,6 +171,7 @@ void optionHandler(String option)
         display.println(F("THUNDER"));
         display.display();
         delay(300);
+        Forward(500, 100);
         while (true)
         {
             Run();
