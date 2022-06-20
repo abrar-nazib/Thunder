@@ -246,12 +246,12 @@ void doura()
     if (Vul > 0)
     {
         R_motorSpeed = motorSpeed - PIDvalue;
-        L_motorSpeed = (motorSpeed)*0.85;
+        L_motorSpeed = motorSpeed;
     }
     else if (Vul < 0)
     {
         R_motorSpeed = motorSpeed;
-        L_motorSpeed = (motorSpeed + PIDvalue) * 0.85;
+        L_motorSpeed = motorSpeed + PIDvalue;
     }
     else
     {
@@ -271,17 +271,17 @@ void doura()
     analogWrite(R_MTR_PWM, R_motorSpeed);
     analogWrite(L_MTR_PWM, L_motorSpeed);
 
-    // digitalWrite(R_MTR_IN_1, HIGH); // 4
-    PORTG = PORTG | (1 << 5);
+    digitalWrite(R_MTR_IN_1, HIGH); // 4->PORTG-5
+    // PORTG = PORTG | (1 << 5);
 
-    // digitalWrite(L_MTR_IN_1, HIGH);  // 6
-    PORTH = PORTH | (1 << 3);
+    digitalWrite(L_MTR_IN_1, HIGH); // 6->PORTH-3
+    // PORTH = PORTH | (1 << 3);
 
-    // digitalWrite(R_MTR_IN_2, LOW); // 2->PORTE-4
-    PORTE = PORTE & ~(1 << 4);
+    digitalWrite(R_MTR_IN_2, LOW); // 2->PORTE-4
+    // PORTE = PORTE & ~(1 << 4);
 
-    // digitalWrite(L_MTR_IN_2, LOW); // 7->PORTH-4
-    PORTH = PORTH & ~(1 << 4);
+    digitalWrite(L_MTR_IN_2, LOW); // 7->PORTH-4
+    // PORTH = PORTH & ~(1 << 4);
 }
 
 void Run()
