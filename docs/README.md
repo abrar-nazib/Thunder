@@ -32,9 +32,12 @@ EEPROM memory diagram:
 - 38 left_btn PIND7
 - 30 up_btn
 - 5 STBY
-- 3 PWMA
+- 3 PWMA (changed to 4)
 - 2 AIN1
-- 4 AIN2
+- 4 AIN2 (changed to 3)
 - 13 PWMB
 - 6 BIN1
 - 7 BIN2
+- rightSonar(trig, echo) = (52, 53)
+- leftSonar(trig, echo) = (49, 48)
+- frontSonar(trig, echo) = (50, 51)
