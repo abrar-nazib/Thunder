@@ -21,7 +21,9 @@ extern void readSensors();
 extern void generateBinary();
 extern void Run();
 extern void Stop(double del);
-extern int sonarSearch();
+extern int sonarSearchF();
+extern int sonarSearchL();
+extern int sonarSearchR();
 extern void Forward(double del, int vel);
 //--------- External important variables----------------------------------------------------------
 extern float motorVariables[4];
@@ -59,6 +61,10 @@ const char *sensorMenuOptions[6] = {
     "S_R_RAW",
     "",
     "BACK"};
+
+int frontSonar;
+int leftSonar;
+int rightSonar;
 
 void displaySetOptionBuffer(String menuType)
 {
@@ -155,6 +161,26 @@ void optionHandler(String option)
             readSensors();
             generateBinary();
             displayDrawMenu("SENSOR_BINARY_MENU");
+            if (buttonPressed() != "NO")
+            {
+                break;
+            }
+        }
+        delay(200);
+    }
+    else if (option == "SONAR_MENU")
+    {
+        display.clearDisplay();
+        display.display();
+        delay(300);
+        while (true)
+        {
+            display.clearDisplay();
+            display.display();
+            frontSonar = sonarSearchF();
+            leftSonar = sonarSearchL();
+            rightSonar = sonarSearchR();
+            displayDrawMenu("SONAR_MENU");
             if (buttonPressed() != "NO")
             {
                 break;
@@ -281,8 +307,12 @@ void displayDrawMenu(String menuType)
 
     else if (menuType == "SONAR_MENU")
     {
-        display.setCursor(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 5);
-        display.println(sonarSearch());
+        display.setCursor(SCREEN_WIDTH / 2, SCREEN_HEIGHT * 0);
+        display.println(frontSonar);
+        display.setCursor(SCREEN_WIDTH * 0.1, SCREEN_HEIGHT / 2 - 5);
+        display.println(leftSonar);
+        display.setCursor(SCREEN_WIDTH * 0.8, SCREEN_HEIGHT / 2 - 5);
+        display.println(rightSonar);
     }
 
     display.display();
@@ -450,6 +480,7 @@ void displayOptionSelector(String menuType)
         {
             buttonInstruction = buttonPressed();
             displayDrawMenu(menuType);
+            optionHandler(menuType);
             if (buttonInstruction != "NO")
                 break;
         }

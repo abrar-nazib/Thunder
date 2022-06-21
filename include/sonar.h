@@ -1,6 +1,8 @@
 #ifndef _SONAR
 
-int sonarSearch();
+int sonarSearchF();
+int sonarSearchL();
+int sonarSearchR();
 void sonarSetup();
 void sonarTest(bool newline);
 
