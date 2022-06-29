@@ -155,7 +155,7 @@ void generateThreshold()
     }
     for (int th_i = 0; th_i < 300; th_i++)
     {
-        Forward(1, 60);
+        Forward(2, 80);
         readSensors();
         for (int sense = 0; sense < numOfSensors; sense++)
         {

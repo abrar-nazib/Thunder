@@ -3,4 +3,5 @@
 void deviation();
 void PIDval();
 void showPIDvalue(bool newline);
+void PIDsetup();
 #endif // _PID_CALC

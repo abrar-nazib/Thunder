@@ -35,6 +35,9 @@ extern void PIDval();
 extern void deviation();
 extern void memoryShowData(struct Memory *m);
 extern void accessMemoryArray(struct Memory *m, uint8_t *accessArray);
+extern float sonarSearchF();
+extern float sonarSearchR();
+extern float sonarSearchL();
 extern double PIDvalue;
 extern double Vul;
 extern byte numOfHighReadings;
@@ -196,18 +199,20 @@ void Tleft()
         generateBinary();
         if (sensorBinaryReading[0] == 1 || sensorBinaryReading[1] == 1)
         {
-            while (true)
-            {
-                Left(10, 100);
-                readSensors();
-                generateBinary();
-                if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
-                {
-                    BreakL();
-                    Stop(50);
-                    break;
-                }
-            }
+            // while (true)
+            // {
+            //     Left(10, 100);
+            //     readSensors();
+            //     generateBinary();
+            //     if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
+            //     {
+            //         BreakL();
+            //         Stop(50);
+            //         break;
+            //     }
+            // }
+            BreakL();
+            Stop(50);
             break;
         }
     }
@@ -224,18 +229,20 @@ void Tright()
         generateBinary();
         if (sensorBinaryReading[6] == 1 || sensorBinaryReading[7] == 1)
         {
-            while (true)
-            {
-                Right(10, 100);
-                readSensors();
-                generateBinary();
-                if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
-                {
-                    BreakR();
-                    Stop(50);
-                    break;
-                }
-            }
+            // while (true)
+            // {
+            //     Right(10, 100);
+            //     readSensors();
+            //     generateBinary();
+            //     if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
+            //     {
+            //         BreakR();
+            //         Stop(50);
+            //         break;
+            //     }
+            // }
+            BreakR();
+            Stop(50);
             break;
         }
     }
@@ -291,7 +298,7 @@ void Run()
     deviation();
     PIDval();
     doura();
-    if (numOfHighReadings >= 4)
+    if (numOfHighReadings == 0)
     {
         detection();
     }
@@ -299,17 +306,8 @@ void Run()
 
 void detection()
 {
-    while (true)
-    {
-        readSensors();
-        generateBinary();
-        if (numOfHighReadings < 4)
-        {
-            break;
-        }
-    }
 
-    const int memoryLength = 300;
+    const int memoryLength = 200;
     // digitalWrite(LED_1, HIGH);
     // digitalWrite(LED_2, HIGH);
     int l = 0;
@@ -326,15 +324,6 @@ void detection()
         r += (accessArray[i] & rReference);
     }
     // // memoryShowData(&sensorMemory);
-    // digitalWrite(LED_1, LOW);
-    // digitalWrite(LED_2, LOW);
-
-    readSensors();
-    generateBinary();
-    if (sensorBinaryData == B11111111)
-    {
-        Stop(10000);
-    }
     if (r > l)
     {
         // digitalWrite(LED_1, HIGH);
@@ -346,5 +335,48 @@ void detection()
         // digitalWrite(LED_2, HIGH);
         Tleft();
         // digitalWrite(LED_2, LOW);
+    }
+}
+
+void sonarDrive()
+{
+    int Ks = 4;
+    float errorValue = 0;
+    if (sonarSearchR() != 0)
+    {
+        errorValue = 15 - sonarSearchR();
+    }
+    else if (sonarSearchR() == 0)
+    {
+        Stop(100);
+    }
+    int r_pwm = 70 + (errorValue * Ks);
+    int l_pwm = 70 - (errorValue * Ks);
+    if (r_pwm > 70)
+        r_pwm = 70;
+    if (r_pwm < 0)
+        r_pwm = 0;
+    if (l_pwm > 70)
+        l_pwm = 70;
+    if (l_pwm < 0)
+        l_pwm = 0;
+
+    analogWrite(R_MTR_PWM, r_pwm);
+    analogWrite(L_MTR_PWM, l_pwm);
+
+    digitalWrite(R_MTR_IN_1, HIGH); // 4->PORTG-5
+    // PORTG = PORTG | (1 << 5);
+
+    digitalWrite(L_MTR_IN_1, HIGH); // 6->PORTH-3
+    // PORTH = PORTH | (1 << 3);
+
+    digitalWrite(R_MTR_IN_2, LOW); // 2->PORTE-4
+    // PORTE = PORTE & ~(1 << 4);
+
+    digitalWrite(L_MTR_IN_2, LOW); // 7->PORTH-4
+    // PORTH = PORTH & ~(1 << 4);
+    if (sonarSearchF() < 20 && sonarSearchF() != 0)
+    {
+        Left(350, 50);
     }
 }

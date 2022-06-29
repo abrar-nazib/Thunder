@@ -2,7 +2,7 @@
 #include <EEPROM.h>
 #include "memory.h"
 
-const int memoryLength = 300;
+const int memoryLength = 200;
 uint8_t memoryArray[memoryLength];
 struct Memory
 {

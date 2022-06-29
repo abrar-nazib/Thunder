@@ -11,7 +11,7 @@
 extern struct Memory sensorMemory;
 const int numOfSensors = 8;
 extern unsigned int sensorThreshold[numOfSensors];
-extern void setup()
+void setup()
 {
   // Serial.begin(9600);
   displaySetup();
@@ -24,6 +24,7 @@ extern void setup()
 
   sensorSetup();
   motorSetup();
+  PIDsetup();
   sonarSetup();
 
   displayBootScreen();
@@ -32,4 +33,6 @@ extern void setup()
 void loop()
 {
   displayMenu("MAIN_MENU");
+  // sonarTest(1);
+  // displayMenu("SONAR_MENU");
 }

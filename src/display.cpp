@@ -15,15 +15,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 // External Functions in use
 extern String buttonPressed();
 //--------- External important functions---------------------------------------------------------
+extern void sonarDrive();
 extern void memorySaveMotorVariables();
 extern void generateThreshold();
 extern void readSensors();
 extern void generateBinary();
 extern void Run();
 extern void Stop(double del);
-extern int sonarSearchF();
-extern int sonarSearchL();
-extern int sonarSearchR();
+extern float sonarSearchF();
+extern float sonarSearchL();
+extern float sonarSearchR();
 extern void Forward(double del, int vel);
 //--------- External important variables----------------------------------------------------------
 extern float motorVariables[4];
@@ -180,6 +181,7 @@ void optionHandler(String option)
             frontSonar = sonarSearchF();
             leftSonar = sonarSearchL();
             rightSonar = sonarSearchR();
+            // sonarDrive();
             displayDrawMenu("SONAR_MENU");
             if (buttonPressed() != "NO")
             {

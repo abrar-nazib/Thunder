@@ -8,8 +8,9 @@
 #define echoR 53
 
 long duration;
-int distance;
+float distance;
 char dir;
+long waitTime = 4000;
 
 void sonarSetup()
 {
@@ -21,7 +22,7 @@ void sonarSetup()
     pinMode(echoR, INPUT);
 }
 
-int sonarSearchF()
+float sonarSearchF()
 {
     digitalWrite(trigF, LOW);
     delayMicroseconds(2);
@@ -30,7 +31,7 @@ int sonarSearchF()
     delayMicroseconds(10);
     digitalWrite(trigF, LOW);
     // Reads the echoPin, returns the sound wave travel time in microseconds
-    duration = pulseIn(echoF, HIGH, 6024);
+    duration = pulseIn(echoF, HIGH, waitTime);
     // Calculating the distance
     distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
     // Displays the distance on the Serial Monitor
@@ -38,7 +39,8 @@ int sonarSearchF()
     return distance;
 }
 
-int sonarSearchL(){
+float sonarSearchL()
+{
     digitalWrite(trigL, LOW);
     delayMicroseconds(2);
     // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
@@ -46,7 +48,7 @@ int sonarSearchL(){
     delayMicroseconds(10);
     digitalWrite(trigL, LOW);
     // Reads the echoPin, returns the sound wave travel time in microseconds
-    duration = pulseIn(echoL, HIGH, 6024);
+    duration = pulseIn(echoL, HIGH, waitTime);
     // Calculating the distance
     distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
     // Displays the distance on the Serial Monitor
@@ -54,7 +56,8 @@ int sonarSearchL(){
     return distance;
 }
 
-int sonarSearchR(){
+float sonarSearchR()
+{
     digitalWrite(trigR, LOW);
     delayMicroseconds(2);
     // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
@@ -62,7 +65,7 @@ int sonarSearchR(){
     delayMicroseconds(10);
     digitalWrite(trigR, LOW);
     // Reads the echoPin, returns the sound wave travel time in microseconds
-    duration = pulseIn(echoR, HIGH, 6024);
+    duration = pulseIn(echoR, HIGH, waitTime);
     // Calculating the distance
     distance = duration * 0.034 / 2; // Speed of sound wave divided by 2 (go and back)
     // Displays the distance on the Serial Monitor
@@ -72,8 +75,15 @@ int sonarSearchR(){
 
 void sonarTest(bool newline)
 {
+    Serial.print("F = ");
+    Serial.print(sonarSearchF());
+    Serial.print("  ");
+    Serial.print("R = ");
+    Serial.print(sonarSearchR());
+    Serial.print("  ");
+    Serial.print("L = ");
+    Serial.print(sonarSearchL());
+    Serial.print("  ");
     if (newline)
-        Serial.println(sonarSearchF());
-    else
-        Serial.print(sonarSearchF());
+        Serial.println("");
 }
