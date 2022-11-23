@@ -13,6 +13,7 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // External Functions in use
+// Slight change for checking
 extern String buttonPressed();
 //--------- External important functions---------------------------------------------------------
 extern void sonarDrive();
