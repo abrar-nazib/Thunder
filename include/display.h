@@ -10,6 +10,7 @@ void displayOptionSelector(String menuType);
 void displayScrollText(); // Draw scrolling text
 void displayDrawGrid(String menuType);
 void displaySetOptionBuffer(String menuType);
+void displayCaseDetector(String type);
 //
 //
 //

@@ -103,6 +103,7 @@ void displayBootScreen()
     display.display();
     delay(500);
 }
+
 void optionHandler(String option)
 {
     if (option == "SAVE")
@@ -227,7 +228,7 @@ void displayDrawMenu(String menuType)
     display.setTextSize(1);              // Set the text size
     display.setTextColor(SSD1306_WHITE); // Set the text color
 
-    if (menuType == "MAIN_MENU")
+    if (menuType == "MAIN_MENU") // Shows the main menu
     {
         displayDrawGrid(menuType);
         displaySetOptionBuffer(menuType);
@@ -242,7 +243,7 @@ void displayDrawMenu(String menuType)
         }
     }
 
-    else if (menuType == "PID_MENU")
+    else if (menuType == "PID_MENU") // Shows the PID menu.
     {
         displayDrawGrid(menuType);
         displaySetOptionBuffer(menuType);
@@ -252,7 +253,8 @@ void displayDrawMenu(String menuType)
             display.setCursor(x, y);                        // Set the cursor position . The top left position is 0,0
             display.println(optionBuffer[optionsIterator]); // Print from the cursor position
             display.setCursor(SCREEN_WIDTH / 2 + 4, y);
-            display.println(motorVariables[optionsIterator + optionStart]);
+            if (optionsIterator + optionStart < 4)
+                display.println(motorVariables[optionsIterator + optionStart]);
         }
     }
 
@@ -550,6 +552,19 @@ void displayOptionSelector(String menuType)
             }
         }
     }
+}
+
+void displayCaseDetector(String type)
+{
+    display.clearDisplay();              // Clear the display
+    display.setTextSize(2);              // Set the text size
+    display.setTextColor(SSD1306_WHITE); // Set the text color
+    display.setCursor(20, 20);
+    if (type == "R")
+        display.println("R");
+    else if (type == "L")
+        display.println("L");
+    display.display();
 }
 
 void displayScrollText()

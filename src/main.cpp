@@ -33,6 +33,4 @@ void setup()
 void loop()
 {
   displayMenu("MAIN_MENU");
-  // sonarTest(1);
-  // displayMenu("SONAR_MENU");
 }

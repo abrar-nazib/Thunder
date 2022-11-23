@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "motor.h"
+#include "display.h"
 
 //-------------- Connection related---------------------------------------
 #define R_MTR_PWM 4
@@ -298,7 +299,7 @@ void Run()
     deviation();
     PIDval();
     doura();
-    if (numOfHighReadings == 0)
+    if (numOfHighReadings == 0 || numOfHighReadings > 3)
     {
         detection();
     }
@@ -326,13 +327,12 @@ void detection()
     // // memoryShowData(&sensorMemory);
     if (r > l)
     {
-        // digitalWrite(LED_1, HIGH);
+        displayCaseDetector("R");
         Tright();
-        // digitalWrite(LED_1, LOW);
     }
     if (l > r)
     {
-        // digitalWrite(LED_2, HIGH);
+        displayCaseDetector("L");
         Tleft();
         // digitalWrite(LED_2, LOW);
     }
