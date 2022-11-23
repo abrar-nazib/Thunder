@@ -2,7 +2,7 @@
 #include <EEPROM.h>
 #include "memory.h"
 
-const int memoryLength = 200;
+const int memoryLength = 100;
 uint8_t memoryArray[memoryLength];
 struct Memory
 {
@@ -27,6 +27,7 @@ void memorySetup(struct Memory *m)
         m->arr[i] = 0;
     }
 }
+
 void memoryShowData(struct Memory *m)
 {
     for (int i = m->position + 1; i <= m->size + m->position; i++)
@@ -71,6 +72,7 @@ void memoryRetrieveMotorVariables()
         EEPROM.get(i * (sizeof(float)), motorVariables[i]);
     }
 }
+
 void memorySaveSensorVariables()
 {
     for (int i = 0; i < numOfSensors; i++)

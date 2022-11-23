@@ -26,6 +26,7 @@ extern void memoryRetrieveSensorVariables();
 extern void memorySaveSensorVariables();
 extern struct Memory sensorMemory;
 extern void memoryAddReading(struct Memory *m, int reading);
+extern void Right(double del, int vel);
 
 void sensorSetup()
 {
@@ -147,6 +148,7 @@ void generateThreshold()
     /*
      * For generating threshold value
      */
+    Stop(500);
     Serial.println("Generate Threshold");
     for (int fill_i = 0; fill_i < numOfSensors; fill_i++)
     {
@@ -155,7 +157,7 @@ void generateThreshold()
     }
     for (int th_i = 0; th_i < 300; th_i++)
     {
-        Forward(2, 80);
+        Right(4, 90);
         readSensors();
         for (int sense = 0; sense < numOfSensors; sense++)
         {

@@ -12,6 +12,15 @@
 // Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+// External Helper
+const int numOfSensors = 8;
+// External variables in use
+extern struct Memory sensorMemory;
+extern int sensorThreshold[numOfSensors];
+extern int sensorRawReading[numOfSensors];
+extern boolean sensorBinaryReading[numOfSensors];
+extern float motorVariables[4];
+
 // External Functions in use
 extern String buttonPressed();
 //--------- External important functions---------------------------------------------------------
@@ -26,13 +35,9 @@ extern float sonarSearchF();
 extern float sonarSearchL();
 extern float sonarSearchR();
 extern void Forward(double del, int vel);
-//--------- External important variables----------------------------------------------------------
-extern float motorVariables[4];
+extern void memorySetup(struct Memory *m);
 
-const int numOfSensors = 8;
-extern int sensorThreshold[numOfSensors];
-extern int sensorRawReading[numOfSensors];
-extern boolean sensorBinaryReading[numOfSensors];
+// Local  variables----------------------------------------------------------
 
 // Global variables related to Option Selector
 int optX = 2;
@@ -193,6 +198,8 @@ void optionHandler(String option)
     }
     else if (option == "RUN")
     {
+
+        memorySetup(&sensorMemory); // clears the memory with all 0 before running
         display.clearDisplay();
         display.setTextSize(2);
         display.setTextColor(SSD1306_WHITE);

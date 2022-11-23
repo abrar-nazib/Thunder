@@ -26,7 +26,16 @@ float &D = motorVariables[3];
 const byte numOfSensors = 8;
 int R_motorSpeed = motorSpeed;
 int L_motorSpeed = motorSpeed;
-//------------ External variables+functions used here-----------------
+const int memoryLength = 100;
+
+//------------ External variables used here
+extern struct Memory sensorMemory;
+extern double PIDvalue;
+extern double Vul;
+extern byte numOfHighReadings;
+extern byte sensorBinaryData;
+
+//------------ External functions used here-----------------
 extern void readSensors();
 extern void generateBinary();
 extern boolean sensorBinaryReading[numOfSensors];
@@ -35,15 +44,12 @@ extern void memoryRetrieveMotorVariables();
 extern void PIDval();
 extern void deviation();
 extern void memoryShowData(struct Memory *m);
+extern void memorySetup(struct Memory *m);
 extern void accessMemoryArray(struct Memory *m, uint8_t *accessArray);
 extern float sonarSearchF();
 extern float sonarSearchR();
 extern float sonarSearchL();
-extern double PIDvalue;
-extern double Vul;
-extern byte numOfHighReadings;
-extern byte sensorBinaryData;
-extern struct Memory sensorMemory;
+extern void memoryShowData(struct Memory *m);
 //-------------------------------------------------------------------
 
 void motorSetup()
@@ -299,18 +305,31 @@ void Run()
     deviation();
     PIDval();
     doura();
-    if (numOfHighReadings == 0 || numOfHighReadings > 3)
+    // if (numOfHighReadings == 0 || numOfHighReadings > 4)
+    if (numOfHighReadings == 0)
     {
         detection();
+        memorySetup(&sensorMemory); // Clear memory
     }
 }
 
 void detection()
 {
 
-    const int memoryLength = 200;
     // digitalWrite(LED_1, HIGH);
     // digitalWrite(LED_2, HIGH);
+    for (int i = 0; i < memoryLength / 2; i++)
+    {
+        readSensors();
+        generateBinary();
+        deviation();
+        PIDval();
+        doura();
+    }
+    BreakF();
+    Stop(50);
+    // memoryShowData(&sensorMemory);
+    // Stop(100000);
     int l = 0;
     int r = 0;
     uint8_t lReference = 0b10000000;
