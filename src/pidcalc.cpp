@@ -9,7 +9,7 @@ static double Shomakolon;
 double Parthokko;
 double AgerVul;
 int sm = 0;
-const int vulCollectionSize = 5;
+const int vulCollectionSize = 20;
 double vulCollection[vulCollectionSize];
 // Case detection variables
 byte caseVariables[100] = {
@@ -71,9 +71,9 @@ void deviation()
     else if (sensorBinaryData == B01000000)
         Vul = -12.5; // 0110 0000
     else if (sensorBinaryData == B00000001)
-        Vul = 25; // 0000 0001
+        Vul = 30; // 0000 0001
     else if (sensorBinaryData == B10000000)
-        Vul = -25; // 1000 0000
+        Vul = -30; // 1000 0000
 
     //------------------------TWO SENSOR------------------------
     else if (sensorBinaryData == B00001100) // 12
@@ -85,9 +85,9 @@ void deviation()
     else if (sensorBinaryData == B01100000)
         Vul = -12.5; // 0110 0000
     else if (sensorBinaryData == B00000011)
-        Vul = 20; // 0000 0011
+        Vul = 30; // 0000 0011
     else if (sensorBinaryData == B11000000)
-        Vul = -20; // 1100 0000
+        Vul = -30; // 1100 0000
     //-----------------------------three sensor---------------
     else if (sensorBinaryData == B00011100)
         Vul = 4; // 0001 1100

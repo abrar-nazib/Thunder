@@ -9,4 +9,5 @@ void memoryRetrieveMotorVariables();
 void memorySaveSensorVariables();
 void memoryRetrieveSensorVariables();
 void accessMemoryArray(struct Memory *m, uint8_t *accessArray);
+void memoryGetArray(struct Memory *m, uint8_t arr[]);
 #endif //_MEMORY

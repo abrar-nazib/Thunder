@@ -13,7 +13,7 @@ const int numOfSensors = 8;
 extern unsigned int sensorThreshold[numOfSensors];
 void setup()
 {
-  // Serial.begin(9600);
+  Serial.begin(9600);
   displaySetup();
   buttonSetup();
   memorySetup(&sensorMemory);
@@ -29,8 +29,17 @@ void setup()
 
   displayBootScreen();
 }
-
+String arr[100];
 void loop()
 {
   displayMenu("MAIN_MENU");
+
+  // memoryGetArray(&sensorMemory, arr);
+  // Serial.println("---------");
+  // Serial.println("---------");
+  // for (int i = 0; i < 100; i++)
+  // {
+  //   Serial.println(arr[i]);
+  // }
+  // delay(30000);
 }

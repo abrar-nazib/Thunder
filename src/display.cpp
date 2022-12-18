@@ -9,11 +9,15 @@
 // On an arduino MEGA 2560: 20(SDA), 21(SCL)
 #define OLED_RESET 10       // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-// Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+#define CHAR_W 5 // Characer width of text size 1
+#define CHAR_H 6 // Character height of text size 1
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // External Helper
 const int numOfSensors = 8;
+bool specialCase = 0;
 // External variables in use
 extern struct Memory sensorMemory;
 extern int sensorThreshold[numOfSensors];
@@ -23,7 +27,6 @@ extern float motorVariables[4];
 
 // External Functions in use
 extern String buttonPressed();
-//--------- External important functions---------------------------------------------------------
 extern void sonarDrive();
 extern void memorySaveMotorVariables();
 extern void generateThreshold();
@@ -36,23 +39,28 @@ extern float sonarSearchL();
 extern float sonarSearchR();
 extern void Forward(double del, int vel);
 extern void memorySetup(struct Memory *m);
+extern void memoryGetArray(struct Memory *m, uint8_t arr[]);
+extern void count_cases(uint8_t case_array[], int start, int end, uint8_t case_count_arr[]); // from case_detection
 
 // Local  variables----------------------------------------------------------
 
 // Global variables related to Option Selector
+const int memoryLength = 100;
+uint8_t displayMemoryArray[memoryLength];
+
 int optX = 2;
 int optY = 2;
 int optH = 7;
-byte optionStart = 0; // For tracking options
-const char *optionBuffer[3];
-const char *mainMenuOptions[6] = {
+int optionStart = 0; // For tracking options
+String displayOptionBuffer[3];
+String mainMenuOptions[6] = {
     "PID_MENU",
     "SENSOR_MENU",
     "SERVO_MENU",
     "SONAR_MENU",
     "MEMORY_MENU",
     "RUN"};
-const char *PIDoptions[6] =
+String PIDoptions[6] =
     {
         "M_SP",
         "Kp",
@@ -60,30 +68,30 @@ const char *PIDoptions[6] =
         "Kd",
         "SAVE",
         "BACK"};
-const char *sensorMenuOptions[6] = {
+String sensorMenuOptions[6] = {
     "G_THRESHOLD",
     "V_THRESHOLD",
     "S_R_BIN",
     "S_R_RAW",
     "",
-    "BACK"};
+    "BACK",
+};
+
+String sensorCases[5] = {
+    "NORMAL",
+    "LEFT",
+    "RIGHT",
+    "BLACK",
+    "WHITE",
+};
 
 int frontSonar;
 int leftSonar;
 int rightSonar;
 
-void displaySetOptionBuffer(String menuType)
-{
-    for (int i = 0; i < 3; i++)
-    {
-        if (menuType == "MAIN_MENU")
-            optionBuffer[i] = mainMenuOptions[optionStart + i];
-        else if (menuType == "PID_MENU")
-            optionBuffer[i] = PIDoptions[optionStart + i];
-        else if (menuType == "SENSOR_MENU")
-            optionBuffer[i] = sensorMenuOptions[optionStart + i];
-    }
-}
+/**
+ * This function setups the display. Initiates communication in i2c protocol with the screen
+ */
 void displaySetup()
 {
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
@@ -94,21 +102,69 @@ void displaySetup()
     }
     // display.setTextSize(1);
 }
+
+/**
+ * This function adjusts the screen buffer with the menu buffer
+ * Ex: The screen buffer is limited which can show only three lines. But the menu has to show stuffs more than 3.
+ *      This function handles the pseudo scrolling behavior of the screen.
+ */
+void displaySetOptionBuffer(String menuType)
+{
+    String str = "";
+    for (int i = 0; i < 3; i++)
+    {
+        if (menuType == "MAIN_MENU")
+            displayOptionBuffer[i] = mainMenuOptions[optionStart + i];
+        else if (menuType == "PID_MENU")
+            displayOptionBuffer[i] = PIDoptions[optionStart + i];
+        else if (menuType == "SENSOR_MENU")
+            displayOptionBuffer[i] = sensorMenuOptions[optionStart + i];
+        else if (menuType == "MEMORY_MENU")
+        {
+            str = String(optionStart + i);
+            str.concat(" ");
+            for (int xx = 0; xx < 8; xx++)
+            {
+                if ((displayMemoryArray[optionStart + i] & (0b10000000 >> xx)) >> (7 - xx))
+                    str.concat("1");
+                else
+                    str.concat("0");
+            }
+            displayOptionBuffer[i] = str;
+        }
+    }
+}
+
+/**
+ * This function displays the boot screen showing the name of the robot and software.
+ */
 void displayBootScreen()
 {
-
     display.clearDisplay();
     display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
-    display.setCursor(20, 10);
+    display.setCursor(20, 0);
     display.println(F("THUNDER"));
-    display.display();
+    display.setCursor(18, 25);
+    display.setTextSize(1);
+    display.println("CORTEX ROBOTICS");
+    for (int x = 0; x < SCREEN_WIDTH - 5; x += CHAR_W)
+    {
+        display.setCursor(x, 16);
+        display.drawRect(x, 18, 4, 4, SSD1306_WHITE);
+        display.fillRect(x, 18, 4, 4, SSD1306_WHITE);
+        display.display();
+        delay(80);
+    }
     delay(1000);
     display.clearDisplay();
     display.display();
-    delay(500);
+    delay(300);
 }
 
+/**
+ * Function for handling options inside every menu. Option name has to be unique
+ */
 void optionHandler(String option)
 {
     if (option == "SAVE")
@@ -187,7 +243,6 @@ void optionHandler(String option)
             frontSonar = sonarSearchF();
             leftSonar = sonarSearchL();
             rightSonar = sonarSearchR();
-            // sonarDrive();
             displayDrawMenu("SONAR_MENU");
             if (buttonPressed() != "NO")
             {
@@ -207,7 +262,7 @@ void optionHandler(String option)
         display.println(F("THUNDER"));
         display.display();
         delay(300);
-        Forward(500, 100);
+        Forward(50, 100);
         while (true)
         {
             Run();
@@ -216,10 +271,20 @@ void optionHandler(String option)
                 Stop(100);
                 break;
             }
+            if (specialCase == 1)
+            {
+                Stop(100);
+                specialCase = 0;
+                break;
+            }
         }
     }
 }
 
+/**
+ * Handler function for displaying and option selecting for a menu.
+ * This function needs to be called with button press to update the screen
+ */
 void displayMenu(String menu_type)
 {
     delay(300);
@@ -227,6 +292,9 @@ void displayMenu(String menu_type)
     displayOptionSelector(menu_type);
 }
 
+/**
+ * Function to draw menu items
+ */
 void displayDrawMenu(String menuType)
 {
     int x = 14;
@@ -245,8 +313,8 @@ void displayDrawMenu(String menuType)
         // Push all the options to the display buffer
         for (int optionsIterator = 0; optionsIterator < SCREEN_HEIGHT / 10; optionsIterator++, y += 10)
         {
-            display.setCursor(x, y);                        // Set the cursor position . The top left position is 0,0
-            display.println(optionBuffer[optionsIterator]); // Print from the cursor position
+            display.setCursor(x, y);                               // Set the cursor position . The top left position is 0,0
+            display.println(displayOptionBuffer[optionsIterator]); // Print from the cursor position
         }
     }
 
@@ -257,8 +325,8 @@ void displayDrawMenu(String menuType)
 
         for (int optionsIterator = 0; optionsIterator < SCREEN_HEIGHT / 10; optionsIterator++, y += 10)
         {
-            display.setCursor(x, y);                        // Set the cursor position . The top left position is 0,0
-            display.println(optionBuffer[optionsIterator]); // Print from the cursor position
+            display.setCursor(x, y);                               // Set the cursor position . The top left position is 0,0
+            display.println(displayOptionBuffer[optionsIterator]); // Print from the cursor position
             display.setCursor(SCREEN_WIDTH / 2 + 4, y);
             if (optionsIterator + optionStart < 4)
                 display.println(motorVariables[optionsIterator + optionStart]);
@@ -274,8 +342,8 @@ void displayDrawMenu(String menuType)
         // Push all the options to the display buffer
         for (int optionsIterator = 0; optionsIterator < 3; optionsIterator++, y += 10)
         {
-            display.setCursor(x, y);                        // Set the cursor position . The top left position is 0,0
-            display.println(optionBuffer[optionsIterator]); // Print from the cursor position
+            display.setCursor(x, y);                               // Set the cursor position . The top left position is 0,0
+            display.println(displayOptionBuffer[optionsIterator]); // Print from the cursor position
         }
     }
 
@@ -326,6 +394,22 @@ void displayDrawMenu(String menuType)
         display.println(rightSonar);
     }
 
+    else if (menuType == "MEMORY_MENU") // Shows the main menu
+    {
+        memoryGetArray(&sensorMemory, displayMemoryArray);
+        displayDrawGrid(menuType);
+        displaySetOptionBuffer(menuType);
+
+        // drawing the options
+
+        // Push all the options to the display buffer
+        for (int optionsIterator = 0; optionsIterator < SCREEN_HEIGHT / 10; optionsIterator++, y += 10)
+        {
+            display.setCursor(x, y);                               // Set the cursor position . The top left position is 0,0
+            display.println(displayOptionBuffer[optionsIterator]); // Print from the cursor position
+        }
+    }
+
     display.display();
 }
 
@@ -350,6 +434,9 @@ void displayDrawGrid(String menuType)
     }
 }
 
+/**
+ * Function for navigating through menu options
+ */
 void displayOptionSelector(String menuType)
 {
     optY = 2;
@@ -395,10 +482,10 @@ void displayOptionSelector(String menuType)
                 }
                 else if (buttonInstruction == "BTN_SELECT")
                 {
-                    if (strcmp(optionBuffer[optY / 10], "RUN") != 0)
-                        displayMenu(optionBuffer[optY / 10]);
+                    if (displayOptionBuffer[optY / 10] != "RUN")
+                        displayMenu(displayOptionBuffer[optY / 10]);
                     else
-                        optionHandler(optionBuffer[optY / 10]);
+                        optionHandler(displayOptionBuffer[optY / 10]);
                 }
                 displayDrawMenu("MAIN_MENU");
                 display.drawRect(optX, optY, optH, optH, SSD1306_WHITE);
@@ -453,24 +540,25 @@ void displayOptionSelector(String menuType)
                 }
                 else if (buttonInstruction == "BTN_LEFT")
                 {
-                    if ((strcmp(optionBuffer[optY / 10], "SAVE") != 0) && (strcmp(optionBuffer[optY / 10], "BACK") != 0))
+                    if (displayOptionBuffer[optY / 10] != "SAVE" && displayOptionBuffer[optY / 10] != "BACK")
                         motorVariables[(optY / 10) + optionStart] -= 0.2;
                 }
                 else if (buttonInstruction == "BTN_RIGHT")
                 {
-                    if ((strcmp(optionBuffer[optY / 10], "SAVE") != 0) && (strcmp(optionBuffer[optY / 10], "BACK") != 0))
+                    if (displayOptionBuffer[optY / 10] != "SAVE" && displayOptionBuffer[optY / 10] != "BACK")
                         motorVariables[optY / 10 + optionStart] += 0.2;
                 }
                 else if (buttonInstruction == "BTN_SELECT")
                 {
-                    if (strcmp(optionBuffer[optY / 10], "BACK") == 0)
+                    if (displayOptionBuffer[optY / 10] == "BACK")
                     {
                         delay(300);
+                        optionStart = 0;
                         return;
                     }
                     else
                     {
-                        optionHandler(optionBuffer[optY / 10]);
+                        optionHandler(displayOptionBuffer[optY / 10]);
                         delay(300);
                     }
                 }
@@ -540,14 +628,15 @@ void displayOptionSelector(String menuType)
                 }
                 else if (buttonInstruction == "BTN_SELECT" && optY >= 2 && optY <= display.height() - 10)
                 {
-                    if (strcmp(optionBuffer[optY / 10], "BACK") == 0)
+                    if (displayOptionBuffer[optY / 10] == "BACK")
                     {
                         delay(300);
+                        optionStart = 0;
                         return;
                     }
                     else
                     {
-                        optionHandler(optionBuffer[optY / 10]);
+                        optionHandler(displayOptionBuffer[optY / 10]);
                         delay(300);
                     }
                 }
@@ -559,18 +648,90 @@ void displayOptionSelector(String menuType)
             }
         }
     }
+
+    else if (menuType == "MEMORY_MENU")
+    {
+        // Initial rect draw
+        display.drawRect(optX, optY, optH, optH, SSD1306_WHITE);
+        display.fillRect(optX, optY, optH, optH, SSD1306_WHITE);
+        display.display();
+
+        while (true)
+        {
+            buttonInstruction = buttonPressed();
+            if (buttonInstruction != "NO")
+            {
+
+                if (buttonInstruction == "BTN_UP")
+                {
+                    if (optY - 10 < 2)
+                    {
+                        if (optionStart > 0)
+                        {
+                            optionStart--;
+                        }
+                    }
+                    else
+                    {
+                        optY -= 10;
+                    }
+                }
+                else if (buttonInstruction == "BTN_DOWN")
+                {
+                    if (optY + 10 >= SCREEN_HEIGHT)
+                    {
+                        if (optionStart < 97)
+                        {
+                            optionStart++;
+                        }
+                    }
+                    else
+                    {
+                        optY += 10;
+                    }
+                }
+                else if (buttonInstruction == "BTN_SELECT" && optY >= 2 && optY <= display.height() - 10)
+                {
+                    delay(100);
+                    optionStart = 0;
+                    return;
+                }
+                displayDrawMenu("MEMORY_MENU");
+                display.drawRect(optX, optY, optH, optH, SSD1306_WHITE);
+                display.fillRect(optX, optY, optH, optH, SSD1306_WHITE);
+                display.display();
+                delay(50);
+            }
+        }
+    }
 }
 
 void displayCaseDetector(String type)
 {
-    display.clearDisplay();              // Clear the display
-    display.setTextSize(2);              // Set the text size
-    display.setTextColor(SSD1306_WHITE); // Set the text color
-    display.setCursor(20, 20);
-    if (type == "R")
-        display.println("R");
-    else if (type == "L")
-        display.println("L");
+    int y = 0;
+    int x = 0;
+    specialCase = 1;
+    uint8_t case_count_arr[5];
+    String output = "";
+    memoryGetArray(&sensorMemory, displayMemoryArray); // updating the memory array
+    count_cases(displayMemoryArray, 00, 100, case_count_arr);
+    display.clearDisplay();
+    display.setTextSize(1);
+    for (int i = 0; i < 5; i++)
+    {
+
+        display.setCursor(x, y);
+        output = sensorCases[i];
+        output.concat(" ");
+        output.concat(String(case_count_arr[i]));
+        display.println(output);
+        if ((y + 20) > SCREEN_HEIGHT)
+        {
+            x = SCREEN_WIDTH / 2;
+            y = 0;
+        }
+        y += 10;
+    }
     display.display();
 }
 

@@ -40,6 +40,28 @@ void memoryShowData(struct Memory *m)
     }
 }
 
+void memoryGetArray(struct Memory *m, uint8_t arr[])
+{
+    // struct Memory *m;
+    int j = 0;
+
+    for (int i = m->position + 1; i <= m->size + m->position; i++)
+    {
+        // str = String(99 - j);
+        // str = "";
+        // for (int xx = 0; xx < 8; xx++)
+        // {
+        //     if (((m->arr[i % m->size]) & (0b10000000 >> xx)) >> (7 - xx))
+        //         str.concat("1");
+        //     else
+        //         str.concat("0");
+        // }
+
+        arr[99 - j] = m->arr[i % m->size];
+        j++;
+    }
+}
+
 void accessMemoryArray(struct Memory *m, uint8_t *accessArray)
 {
 

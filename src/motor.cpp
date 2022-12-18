@@ -27,6 +27,8 @@ const byte numOfSensors = 8;
 int R_motorSpeed = motorSpeed;
 int L_motorSpeed = motorSpeed;
 const int memoryLength = 100;
+byte R_MTR_STATE = 2;
+byte L_MTR_STATE = 2;
 
 //------------ External variables used here
 extern struct Memory sensorMemory;
@@ -121,11 +123,18 @@ void Forward(double del, int vel)
 {
     analogWrite(R_MTR_PWM, vel);
     analogWrite(L_MTR_PWM, vel);
-    digitalWrite(R_MTR_IN_1, HIGH);
-    digitalWrite(L_MTR_IN_1, HIGH);
-
-    digitalWrite(R_MTR_IN_2, LOW);
-    digitalWrite(L_MTR_IN_2, LOW);
+    if (R_MTR_STATE != 1)
+    {
+        digitalWrite(R_MTR_IN_1, HIGH);
+        digitalWrite(R_MTR_IN_2, LOW);
+        R_MTR_STATE = 1;
+    }
+    if (L_MTR_STATE != 1)
+    {
+        digitalWrite(L_MTR_IN_1, HIGH);
+        digitalWrite(L_MTR_IN_2, LOW);
+        L_MTR_STATE = 1;
+    }
     delay(del);
 }
 
@@ -133,11 +142,19 @@ void Backward(double del, int vel)
 {
     analogWrite(R_MTR_PWM, vel);
     analogWrite(L_MTR_PWM, vel);
-    digitalWrite(R_MTR_IN_2, HIGH);
-    digitalWrite(L_MTR_IN_2, HIGH);
+    if (R_MTR_STATE != -1)
+    {
+        digitalWrite(R_MTR_IN_1, LOW);
+        digitalWrite(R_MTR_IN_2, HIGH);
 
-    digitalWrite(R_MTR_IN_1, LOW);
-    digitalWrite(L_MTR_IN_1, LOW);
+        R_MTR_STATE = -1;
+    }
+    if (L_MTR_STATE != -1)
+    {
+        digitalWrite(L_MTR_IN_2, HIGH);
+        digitalWrite(L_MTR_IN_1, LOW);
+        L_MTR_STATE = -1;
+    }
     delay(del);
 }
 //--------------------------------------------------------------------------------------
@@ -145,10 +162,18 @@ void Right(double del, int vel)
 {
     analogWrite(R_MTR_PWM, vel);
     analogWrite(L_MTR_PWM, vel);
-    digitalWrite(R_MTR_IN_1, LOW);
-    digitalWrite(L_MTR_IN_1, HIGH);
-    digitalWrite(R_MTR_IN_2, HIGH);
-    digitalWrite(L_MTR_IN_2, LOW);
+    if (R_MTR_STATE != -1)
+    {
+        digitalWrite(R_MTR_IN_1, LOW);
+        digitalWrite(R_MTR_IN_2, HIGH);
+        R_MTR_STATE = -1;
+    }
+    if (L_MTR_STATE != 1)
+    {
+        digitalWrite(L_MTR_IN_1, HIGH);
+        digitalWrite(L_MTR_IN_2, LOW);
+        L_MTR_STATE = 1;
+    }
     delay(del);
 }
 //--------------------------------------------------------------------------------------
@@ -156,10 +181,18 @@ void Left(double del, int vel)
 {
     analogWrite(R_MTR_PWM, vel);
     analogWrite(L_MTR_PWM, vel);
-    digitalWrite(R_MTR_IN_1, HIGH);
-    digitalWrite(L_MTR_IN_1, LOW);
-    digitalWrite(R_MTR_IN_2, LOW);
-    digitalWrite(L_MTR_IN_2, HIGH);
+    if (R_MTR_STATE != 1)
+    {
+        digitalWrite(R_MTR_IN_1, HIGH);
+        digitalWrite(R_MTR_IN_2, LOW);
+        R_MTR_STATE = 1;
+    }
+    if (L_MTR_STATE != -1)
+    {
+        digitalWrite(L_MTR_IN_1, LOW);
+        digitalWrite(L_MTR_IN_2, HIGH);
+        L_MTR_STATE = -1;
+    }
     delay(del);
 }
 //---------------------------------------------------------------------------------------
@@ -167,31 +200,39 @@ void Stop(double del)
 {
     analogWrite(R_MTR_PWM, 0);
     analogWrite(L_MTR_PWM, 0);
-    digitalWrite(R_MTR_IN_1, LOW);
-    digitalWrite(L_MTR_IN_1, LOW);
-    digitalWrite(R_MTR_IN_2, LOW);
-    digitalWrite(L_MTR_IN_2, LOW);
+    if (R_MTR_STATE != 0)
+    {
+        digitalWrite(R_MTR_IN_1, LOW);
+        digitalWrite(R_MTR_IN_2, LOW);
+        R_MTR_STATE = 0;
+    }
+    if (L_MTR_STATE != 0)
+    {
+        digitalWrite(L_MTR_IN_1, LOW);
+        digitalWrite(L_MTR_IN_2, LOW);
+        L_MTR_STATE = 0;
+    }
     delay(del);
 }
 // //---------------------------------Breaking functions--------------------------------------
 void BreakF()
 {
     Stop(10);
-    Backward(50, 100);
-    Stop(10);
+    Backward(50, 120);
+    Stop(20);
 }
 // //-----------------------------------------------------------------------------------------
 void BreakL()
 {
     Stop(10);
-    Right(50, 100);
+    Right(50, 120);
     Stop(20);
 }
 // //-----------------------------------------------------------------------------------------
 void BreakR()
 {
     Stop(10);
-    Left(50, 100);
+    Left(50, 120);
     Stop(20);
 }
 //------------------------------Sharp Turn Functions------------------------------------------
@@ -201,23 +242,23 @@ void Tleft()
     Stop(50);
     while (1)
     {
-        Left(10, 150);
+        Left(5, 100);
         readSensors();
         generateBinary();
         if (sensorBinaryReading[0] == 1 || sensorBinaryReading[1] == 1)
         {
-            // while (true)
-            // {
-            //     Left(10, 100);
-            //     readSensors();
-            //     generateBinary();
-            //     if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
-            //     {
-            //         BreakL();
-            //         Stop(50);
-            //         break;
-            //     }
-            // }
+            while (true)
+            {
+                Left(5, 50);
+                readSensors();
+                generateBinary();
+                if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
+                {
+                    BreakL();
+                    Stop(50);
+                    break;
+                }
+            }
             BreakL();
             Stop(50);
             break;
@@ -231,23 +272,23 @@ void Tright()
     Stop(50);
     while (1)
     {
-        Right(10, 150);
+        Right(5, 100);
         readSensors();
         generateBinary();
         if (sensorBinaryReading[6] == 1 || sensorBinaryReading[7] == 1)
         {
-            // while (true)
-            // {
-            //     Right(10, 100);
-            //     readSensors();
-            //     generateBinary();
-            //     if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
-            //     {
-            //         BreakR();
-            //         Stop(50);
-            //         break;
-            //     }
-            // }
+            while (true)
+            {
+                Right(5, 50);
+                readSensors();
+                generateBinary();
+                if (sensorBinaryReading[3] == 1 || sensorBinaryReading[4] == 1)
+                {
+                    BreakR();
+                    Stop(50);
+                    break;
+                }
+            }
             BreakR();
             Stop(50);
             break;
@@ -260,11 +301,11 @@ void doura()
     if (Vul > 0)
     {
         R_motorSpeed = motorSpeed - PIDvalue;
-        L_motorSpeed = motorSpeed;
+        L_motorSpeed = motorSpeed + PIDvalue;
     }
     else if (Vul < 0)
     {
-        R_motorSpeed = motorSpeed;
+        R_motorSpeed = motorSpeed - PIDvalue;
         L_motorSpeed = motorSpeed + PIDvalue;
     }
     else
@@ -274,9 +315,13 @@ void doura()
     }
 
     if (R_motorSpeed < 5)
-        R_motorSpeed = 5;
+    {
+        R_motorSpeed = 0;
+    }
     if (L_motorSpeed < 5)
-        L_motorSpeed = 5;
+    {
+        L_motorSpeed = 0;
+    }
     if (R_motorSpeed > 250)
         R_motorSpeed = 250;
     if (L_motorSpeed > 250)
@@ -285,17 +330,22 @@ void doura()
     analogWrite(R_MTR_PWM, R_motorSpeed);
     analogWrite(L_MTR_PWM, L_motorSpeed);
 
-    digitalWrite(R_MTR_IN_1, HIGH); // 4->PORTG-5
-    // PORTG = PORTG | (1 << 5);
-
-    digitalWrite(L_MTR_IN_1, HIGH); // 6->PORTH-3
-    // PORTH = PORTH | (1 << 3);
-
-    digitalWrite(R_MTR_IN_2, LOW); // 2->PORTE-4
-    // PORTE = PORTE & ~(1 << 4);
-
-    digitalWrite(L_MTR_IN_2, LOW); // 7->PORTH-4
-    // PORTH = PORTH & ~(1 << 4);
+    if (R_MTR_STATE != 1)
+    {
+        digitalWrite(R_MTR_IN_1, HIGH); // 4->PORTG-5
+        // PORTG = PORTG | (1 << 5);
+        digitalWrite(R_MTR_IN_2, LOW); // 2->PORTE-4
+                                       // PORTE = PORTE & ~(1 << 4);
+        R_MTR_STATE = 1;
+    }
+    if (L_MTR_STATE != 1)
+    {
+        digitalWrite(L_MTR_IN_1, HIGH); // 6->PORTH-3
+        // PORTH = PORTH | (1 << 3);
+        digitalWrite(L_MTR_IN_2, LOW); // 7->PORTH-4
+        // PORTH = PORTH & ~(1 << 4);
+        L_MTR_STATE = 1;
+    }
 }
 
 void Run()
@@ -305,11 +355,11 @@ void Run()
     deviation();
     PIDval();
     doura();
-    // if (numOfHighReadings == 0 || numOfHighReadings > 4)
-    if (numOfHighReadings == 0)
+
+    if (numOfHighReadings == 0 || numOfHighReadings > 4)
     {
         detection();
-        memorySetup(&sensorMemory); // Clear memory
+        // memorySetup(&sensorMemory); // Clear memory
     }
 }
 
@@ -328,33 +378,8 @@ void detection()
     }
     BreakF();
     Stop(50);
-    // memoryShowData(&sensorMemory);
-    // Stop(100000);
-    int l = 0;
-    int r = 0;
-    uint8_t lReference = 0b10000000;
-    uint8_t rReference = 0b00000001;
-    uint8_t accessArray[memoryLength];
-
-    accessMemoryArray(&sensorMemory, accessArray);
-
-    for (int i = 0; i < memoryLength; i++)
-    {
-        l += (accessArray[i] & lReference) >> 7;
-        r += (accessArray[i] & rReference);
-    }
-    // // memoryShowData(&sensorMemory);
-    if (r > l)
-    {
-        displayCaseDetector("R");
-        Tright();
-    }
-    if (l > r)
-    {
-        displayCaseDetector("L");
-        Tleft();
-        // digitalWrite(LED_2, LOW);
-    }
+    displayCaseDetector("Yo");
+    Stop(20000);
 }
 
 void sonarDrive()

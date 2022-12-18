@@ -35,7 +35,7 @@ void sensorSetup()
 
 void readSensors()
 {
-    /*
+    /**
      * Code to read sensor data -> identical to the documentation with some simple modifications
      *
      */
@@ -111,7 +111,7 @@ void showBinarySensorData(bool newline)
 }
 void generateBinary()
 {
-    /*
+    /**
      * Generates a 8 bit binary value from the sensor reading
      */
     numOfHighReadings = 0;
