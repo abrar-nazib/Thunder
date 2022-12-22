@@ -17,4 +17,6 @@ void BreakL();
 void BreakF();
 void detection();
 void sonarDrive();
+void nonPIDRun();
+void handle_case(String case_str);
 #endif // _MOTOR_CONTROL

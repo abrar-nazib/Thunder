@@ -10,7 +10,7 @@
 long duration;
 float distance;
 char dir;
-long waitTime = 4000;
+long waitTime = 2200;
 
 void sonarSetup()
 {

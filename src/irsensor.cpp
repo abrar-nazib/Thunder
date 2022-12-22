@@ -130,15 +130,20 @@ void generateBinary()
         }
         numOfHighReadings += sensorBinaryReading[i];
     }
+    //--------- Check for Invert situation ----------------------------------------------
 
     // Handling Invert situations
-    // if (isInvert)
+    if (isInvert)
+    {
+        for (i = 0; i < numOfSensors; i++)
+        {
+            sensorBinaryReading[i] ^= 1;
+        }
+        sensorBinaryData = ~sensorBinaryData;
+    }
+    // if (sensorBinaryData == B11100111 || sensorBinaryData == B11001111 || sensorBinaryData == B11110011 || sensorBinaryData == B11000111 || sensorBinaryData == B11100011)
     // {
-    //     for (i = 0; i < numOfSensors; i++)
-    //     {
-    //         sensorBinaryReading[i] ^= 1;
-    //     }
-    //     sensorBinaryData = ~sensorBinaryData;
+    //     isInvert ^= 1;
     // }
     memoryAddReading(&sensorMemory, sensorBinaryData);
 }
@@ -169,7 +174,7 @@ void generateThreshold()
     }
     for (int thr = 0; thr < numOfSensors; thr++)
     {
-        sensorThreshold[thr] = ((sensorHighestReadings[thr] + sensorLowestReadings[thr]) / 2) - 100;
+        sensorThreshold[thr] = ((sensorHighestReadings[thr] + sensorLowestReadings[thr]) / 2);
     }
     Stop(10);
     memorySaveSensorVariables();

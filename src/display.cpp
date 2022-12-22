@@ -40,7 +40,6 @@ extern float sonarSearchR();
 extern void Forward(double del, int vel);
 extern void memorySetup(struct Memory *m);
 extern void memoryGetArray(struct Memory *m, uint8_t arr[]);
-extern void count_cases(uint8_t case_array[], int start, int end, uint8_t case_count_arr[]); // from case_detection
 
 // Local  variables----------------------------------------------------------
 
@@ -77,10 +76,12 @@ String sensorMenuOptions[6] = {
     "BACK",
 };
 
-String sensorCases[5] = {
+String sensorCases[7] = {
     "NORMAL",
     "LEFT",
+    "D_LEFT",
     "RIGHT",
+    "D_RIGHT",
     "BLACK",
     "WHITE",
 };
@@ -144,7 +145,7 @@ void displayBootScreen()
     display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(20, 0);
-    display.println(F("THUNDER"));
+    display.println(F("SPECTRE"));
     display.setCursor(18, 25);
     display.setTextSize(1);
     display.println("CORTEX ROBOTICS");
@@ -259,7 +260,7 @@ void optionHandler(String option)
         display.setTextSize(2);
         display.setTextColor(SSD1306_WHITE);
         display.setCursor(20, 10);
-        display.println(F("THUNDER"));
+        display.println(F("SPECTRE"));
         display.display();
         delay(300);
         Forward(50, 100);
@@ -706,18 +707,15 @@ void displayOptionSelector(String menuType)
     }
 }
 
-void displayCaseDetector(String type)
+void displayCaseDetector(uint8_t case_count_arr[])
 {
+    specialCase = 1;
     int y = 0;
     int x = 0;
-    specialCase = 1;
-    uint8_t case_count_arr[5];
     String output = "";
-    memoryGetArray(&sensorMemory, displayMemoryArray); // updating the memory array
-    count_cases(displayMemoryArray, 00, 100, case_count_arr);
     display.clearDisplay();
     display.setTextSize(1);
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 7; i++)
     {
 
         display.setCursor(x, y);
@@ -725,39 +723,26 @@ void displayCaseDetector(String type)
         output.concat(" ");
         output.concat(String(case_count_arr[i]));
         display.println(output);
-        if ((y + 20) > SCREEN_HEIGHT)
+
+        y += 8;
+        if ((y + 8) > SCREEN_HEIGHT)
         {
             x = SCREEN_WIDTH / 2;
             y = 0;
         }
-        y += 10;
     }
     display.display();
 }
 
-void displayScrollText()
+void displayCaseDecision(String case_str)
 {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(10, 0);
-    display.println(F("scroll"));
-    display.display(); // Show initial text
-    delay(100);
+    // specialCase = 1;
+    int y = 15;
+    int x = 50;
 
-    // Scroll in various directions, pausing in-between:
-    // display.startscrollright(0x00, 0x0F);
-    // delay(2000);
-    // display.stopscroll();
-    // delay(1000);
-    // display.startscrollleft(0x00, 0x0F);
-    // delay(2000);
-    // display.stopscroll();
-    // delay(1000);
-    display.startscrolldiagright(0x00, 0x07);
-    delay(2000);
-    display.startscrolldiagleft(0x00, 0x07);
-    delay(2000);
-    display.stopscroll();
-    delay(1000);
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setCursor(x, y);
+    display.println(case_str);
+    display.display();
 }

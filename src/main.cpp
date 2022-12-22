@@ -33,7 +33,7 @@ String arr[100];
 void loop()
 {
   displayMenu("MAIN_MENU");
-
+  // sonarDrive();
   // memoryGetArray(&sensorMemory, arr);
   // Serial.println("---------");
   // Serial.println("---------");

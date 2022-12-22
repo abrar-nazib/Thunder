@@ -12,18 +12,6 @@ int sm = 0;
 const int vulCollectionSize = 20;
 double vulCollection[vulCollectionSize];
 // Case detection variables
-byte caseVariables[100] = {
-    // Two sensor acute left
-    B11011000,
-    B11001100,
-    B11110000, // 90 degree
-    B11111000, // 90 degree
-    // Two sensor acute right
-    B00011011,
-    B00110011,
-    B00001111, // 90 degree
-    B00011111  // 90 degree
-};
 
 //------------------External Variables---------------------------------------
 const byte numOfSensors = 8;
@@ -32,7 +20,6 @@ extern byte sensorBinaryData;
 extern float &P;
 extern float &I;
 extern float &D;
-extern bool isInvert; // For invert detection
 //----------------------------------THE MAIN CALCULATION&EXECUTION------------------------------------------------
 static int manualPIDcalcArray[numOfSensors] = {-6, -4, -2, -1, 1, 2, 4, 6};
 
@@ -121,11 +108,6 @@ void deviation()
         }
         Vul = Vul / sm;
     }
-    //--------- Check for Invert situation ----------------------------------------------
-    // if (sensorBinaryData == B11100111 || sensorBinaryData == B11001111 || sensorBinaryData == B11110011 || sensorBinaryData == B11000111 || sensorBinaryData == B11100011 || sensorBinaryData == B11101111 || sensorBinaryData == B11110111 || sensorBinaryData == B11011111 || sensorBinaryData == B11111011)
-    // {
-    //     isInvert ^= 1;
-    // }
 }
 //-----------------------------------------------------------------------------------
 void PIDval()
