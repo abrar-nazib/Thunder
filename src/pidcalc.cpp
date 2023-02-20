@@ -9,7 +9,7 @@ static double Shomakolon;
 double Parthokko;
 double AgerVul;
 int sm = 0;
-const int vulCollectionSize = 20;
+const int vulCollectionSize = 10;
 double vulCollection[vulCollectionSize];
 // Case detection variables
 

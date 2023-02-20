@@ -4,6 +4,8 @@
 /*--------- Global variables --------------*/
 uint8_t sensorReadingArray[100]; // for accessing memory as an array
 extern struct Memory sensorMemory;
+extern bool isInvert;
+unsigned int inverseCases = 0;
 
 /*--------- External Global Variables -----*/
 
@@ -76,6 +78,8 @@ uint8_t sensorRightTurnCases[]{
     0b01111110,
     0b00111100,
     0b01100110,
+    0b01101110,
+    0b01110110,
 };
 
 uint8_t sensorDangerRight[] =
@@ -87,6 +91,7 @@ uint8_t sensorDangerRight[] =
 
 void count_cases(uint8_t case_count_arr[], int start, int end)
 {
+    inverseCases = 0;
     // Update the memory with latest data to count cases from it
     memoryGetArray(&sensorMemory, sensorReadingArray);
 
@@ -132,6 +137,14 @@ void count_cases(uint8_t case_count_arr[], int start, int end)
             case_count_arr[5]++; // Black cases
         if (sensorReadingArray[i] == 0b00000000)
             case_count_arr[6]++; // White cases
+        if (sensorReadingArray[i] == 0b11100111 || sensorReadingArray[i] == 0b11110011 || sensorReadingArray[i] == 0b11001111)
+        {
+            inverseCases++;
+        }
+    }
+    if (inverseCases > 5)
+    {
+        isInvert ^= 1;
     }
 }
 
@@ -142,16 +155,19 @@ String detect_case()
     uint8_t case_count_arr_after[7];
     count_cases(case_count_arr_before, 50, 100);
     count_cases(case_count_arr_after, 0, 50);
-
+    if (inverseCases > 5)
+    {
+        inverseCases = 0;
+        return "N";
+    }
     //---------------- uncomment for debugging ---------------
-    Stop(100);
-    displayCaseDetector(case_count_arr_before);
-    delay(5000);
-    displayCaseDetector(case_count_arr_after);
-    delay(5000);
+    // Stop(100);
+    // displayCaseDetector(case_count_arr_before);
+    // delay(5000);
+    // displayCaseDetector(case_count_arr_after);
+    // delay(5000);
     //--------------------------------------------------------
 
-    // Detection of PID Failure in Left Side
     if (case_count_arr_after[5] > 7 && case_count_arr_after[0] > 10 && case_count_arr_after[6] < 5)
     {
         // 6 -> white cases
@@ -163,11 +179,11 @@ String detect_case()
     {
         return "T";
     }
-    if (case_count_arr_after[0] > 15 && case_count_arr_after[3] > 5)
+    if (case_count_arr_after[0] > 10 && case_count_arr_after[3] > 5)
     {
         return "TR";
     }
-    if (case_count_arr_after[0] > 15 && case_count_arr_after[1] > 5)
+    if (case_count_arr_after[0] > 10 && case_count_arr_after[1] > 5)
     {
         return "TL";
     }

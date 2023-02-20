@@ -155,12 +155,12 @@ void displayBootScreen()
         display.drawRect(x, 18, 4, 4, SSD1306_WHITE);
         display.fillRect(x, 18, 4, 4, SSD1306_WHITE);
         display.display();
-        delay(80);
+        delay(10);
     }
     delay(1000);
     display.clearDisplay();
     display.display();
-    delay(300);
+    delay(50);
 }
 
 /**
@@ -263,7 +263,7 @@ void optionHandler(String option)
         display.println(F("SPECTRE"));
         display.display();
         delay(300);
-        Forward(50, 100);
+        Forward(50, 200);
         while (true)
         {
             Run();

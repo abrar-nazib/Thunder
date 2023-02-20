@@ -220,7 +220,7 @@ void Stop(double del)
 // //---------------------------------Breaking functions--------------------------------------
 void BreakF()
 {
-    Backward(50, 200);
+    Backward(45, 220);
     Stop(20);
 }
 // //-----------------------------------------------------------------------------------------
@@ -375,7 +375,7 @@ void handle_case(String case_str)
     {
         Tright();
     }
-    if (case_str == "L_B")
+    else if (case_str == "L_B")
     {
         Vul = 0;
         for (int i = 0; i < 5; i++)
@@ -393,7 +393,7 @@ void handle_case(String case_str)
             sonarDrive();
         }
     }
-    if (case_str == "P_L")
+    else if (case_str == "P_L")
     {
         Tleft();
     }
@@ -404,7 +404,7 @@ void handle_case(String case_str)
     else if (case_str == "B")
     {
         BreakF();
-        Stop(10000);
+        Stop(4000);
     }
     else if (case_str == "L")
     {
@@ -452,7 +452,7 @@ void detection()
     // digitalWrite(LED_1, HIGH);
     // digitalWrite(LED_2, HIGH);
     float tempMotorSpeed = motorSpeed;
-    motorSpeed = 120;
+    motorSpeed = 100;
     for (int i = 0; i < 50; i++)
         nonPIDRun();
     case_str = detect_case();
